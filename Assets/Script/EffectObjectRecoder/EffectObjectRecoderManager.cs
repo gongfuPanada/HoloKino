@@ -8,6 +8,8 @@ public class EffectObjectRecoderManager : MonoBehaviour
 
     public string MovieName = "";
 
+    public GameObject parent;
+
     private List<ObjectRecoderQueue> effectRecoderObjects;
 
     void Start()
@@ -27,12 +29,25 @@ public class EffectObjectRecoderManager : MonoBehaviour
 
                     GameObject temp = Instantiate(objects[i]._object);
                     temp.SetActive(true);
-                    temp.transform.position = objects[i]._position[t];
+
+                    Vector3 backScale = temp.transform.localScale;
+                    Vector3 backPos = temp.transform.localPosition;
+                    Quaternion backRot = temp.transform.localRotation;
+
+                    temp.transform.parent = parent.transform;
+
+                    temp.transform.localScale = backScale;
+                    temp.transform.localPosition = backPos;
+                    temp.transform.localRotation = backRot;
+
                     temp.GetComponent<FracturedObject>().StartStatic = false;
+
+                    // -----
 
                     Destroy(temp.gameObject, 4.0f);
 
                     Transform[] allChildren = temp.GetComponentsInChildren<Transform>();
+
                     for (int j = 0; j < allChildren.Length; j++)
                     {
                         Rigidbody rigid = allChildren[j].GetComponent<Rigidbody>();

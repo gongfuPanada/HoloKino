@@ -16,6 +16,8 @@ public class EffectObjectPlayerManager : MonoBehaviour
     [SerializeField]
     private GameObject[] effectGameObjects;
 
+    private List<GameObject> allEffects;
+
     [SerializeField]
     private string MovieName = "null";
     string path;
@@ -27,6 +29,8 @@ public class EffectObjectPlayerManager : MonoBehaviour
         master = Application.streamingAssetsPath + "/Movie/" + path;
 
         effects = new Dictionary<string, GameObject>();
+
+        allEffects = new List<GameObject>();
 
         // 이펙트를 불러옴
         if (effectNames.Length != effectGameObjects.Length)
@@ -41,7 +45,15 @@ public class EffectObjectPlayerManager : MonoBehaviour
             }
         }
 
-        StartCoroutine(Process());
+        CreateSnowRock();
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            CreateSnowRock();
+        }
     }
 
     IEnumerator Process()
@@ -51,6 +63,11 @@ public class EffectObjectPlayerManager : MonoBehaviour
         yield return www;
 
         Interpret(www.text);
+    }
+
+    void OtherProcess()
+    {
+        Interpret(master);
     }
 
     private void Interpret(string _strSource)
@@ -63,20 +80,16 @@ public class EffectObjectPlayerManager : MonoBehaviour
 
 #if NETFX_CORE
         StringReader stringReader = new StringReader(_strSource);
-
         Document.Load(stringReader);
 #else
         Document.Load(master);
 #endif
         System.Xml.XmlElement MovieDataList = Document["MovieDataList"];
 
-        Queue<EffectObjectPlayerObject> effectPlayers = new Queue<EffectObjectPlayerObject>();
-
-        EffectObjectPlayerObject playerObject = null;
-
         foreach (System.Xml.XmlElement data in MovieDataList.ChildNodes)
         {
             string objectName = data.GetAttribute("ObjectName");
+
             float begine = Convert.ToSingle(data.GetAttribute("Begine"));
 
             Vector3 pos;
@@ -85,14 +98,31 @@ public class EffectObjectPlayerManager : MonoBehaviour
             pos.z = Convert.ToSingle(data.GetAttribute("z"));
 
             // Mono를 상속받아 생성자 호출 X
-            playerObject = gameObject.AddComponent(typeof(EffectObjectPlayerObject)) as EffectObjectPlayerObject;
-            playerObject.DataLoad(effects[objectName], begine, pos);
-            playerObject.PlayerObjectLoad(objectParents);
-            playerObject.EffectStart();
+            EffectObjectPlayerObject playerObject = new GameObject().AddComponent<EffectObjectPlayerObject>();
+            playerObject.DataLoad(begine, pos);
+            playerObject.PlayerObjectLoad(effects[objectName], objectParents);
 
-            effectPlayers.Enqueue(playerObject);
-
-            playerObject = null;
+            allEffects.Add(playerObject.gameObject);
+            allEffects.Add(playerObject._object);
         }
+    }
+
+    public void CreateSnowRock()
+    {
+        StopCoroutine(Process());
+
+        if (allEffects.Count > 0)
+        {
+            for (int i = 0; i < allEffects.Count; i++)
+            {
+                Destroy(allEffects[i]);
+            }
+        }
+
+        allEffects.Clear();
+
+        // OtherProcess();
+
+        StartCoroutine(Process());
     }
 }
