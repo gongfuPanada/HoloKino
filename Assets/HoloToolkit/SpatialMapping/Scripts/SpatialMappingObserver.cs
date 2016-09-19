@@ -31,14 +31,13 @@ namespace HoloToolkit.Unity
     {
         [Tooltip("The number of triangles to calculate per cubic meter.")]
         public float TrianglesPerCubicMeter = 500f;
-        
+
         [Tooltip("The extents of the observation volume.")]
         public Vector3 Extents = Vector3.one * 10.0f;
 
         [Tooltip("How long to wait (in sec) between Spatial Mapping updates.")]
         public float TimeBetweenUpdates = 3.5f;
 
-        public TapToPlace MeshUpdateObj;
         /// <summary>
         /// Event for hooking when surfaces are changed.
         /// </summary>
@@ -120,11 +119,6 @@ namespace HoloToolkit.Unity
         /// </summary>
         private void Update()
         {
-            if(MeshUpdateObj.placing)
-            {
-                TimeBetweenUpdates = 3.5f;
-            }
-            else { TimeBetweenUpdates = 20; }
             // Only do processing if the observer is running.
             if (ObserverState == ObserverStates.Running)
             {
@@ -249,7 +243,6 @@ namespace HoloToolkit.Unity
             // to represent its state and attach some Mesh-related
             // components to it.
             GameObject toReturn = AddSurfaceObject(null, string.Format("Surface-{0}", surfaceID), transform, surfaceID);
-
             toReturn.AddComponent<WorldAnchor>();
 
             return toReturn;

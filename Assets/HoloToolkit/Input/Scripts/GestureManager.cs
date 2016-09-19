@@ -65,7 +65,7 @@ namespace HoloToolkit.Unity
         /// a manipulation gesture is not in progress
         /// </summary>
         public Vector3 ManipulationOffset { get; private set; }
-
+        public GameObject obj;
         /// <summary>
         /// The world space position of the hand being used for the current manipulation gesture.  Not valid
         /// if a manipulation gesture is not in progress.
@@ -158,6 +158,8 @@ namespace HoloToolkit.Unity
             {
                 FocusedObject.SendMessage("OnSelect");
             }
+            if (FocusedObject != obj)
+                obj.SendMessage("OnSelect");
         }
 
         private void ManipulationRecognizer_ManipulationStartedEvent(InteractionSourceKind source, Vector3 cumulativeDelta, Ray headRay)

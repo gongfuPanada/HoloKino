@@ -28,12 +28,14 @@ namespace HoloToolkit.Unity
         /// </summary>
         WorldAnchorStore anchorStore = null;
 
+        public EffectObjectPlayerManager effectPlayerManager;
+
         /// <summary>
         /// Locally saved wold anchor.
         /// </summary>
         WorldAnchor savedAnchor;
-        [HideInInspector]
-       public bool placing = true;
+
+        bool placing = false;
 
         void Start()
         {
@@ -53,7 +55,7 @@ namespace HoloToolkit.Unity
             if (savedAnchor == null)
             {
                 // Either world anchor was not saved / does not exist or has a different name.
-                Debug.Log(gameObject.name + " : "+ "World anchor could not be loaded for this game object. Creating a new anchor.");
+                Debug.Log(gameObject.name + " : " + "World anchor could not be loaded for this game object. Creating a new anchor.");
 
                 // Create anchor since one does not exist.
                 CreateAnchor();
@@ -75,7 +77,8 @@ namespace HoloToolkit.Unity
                 // If the user is in placing mode, display the spatial mapping mesh.
                 if (placing)
                 {
-                    //SpatialMappingManager.Instance.DrawVisualMeshes = true;
+                    // SpatialMappingManager.Instance.DrawVisualMeshes = true;
+                    //transform.position = new Vector3(transform.position.x, transform.position.y, 1);
 
                     Debug.Log(gameObject.name + " : " + "Removing existing world anchor if any.");
 
@@ -87,14 +90,27 @@ namespace HoloToolkit.Unity
                     {
                         anchorStore.Delete(SavedAnchorFriendlyName);
                     }
+
+                    for (int i = 0; i < SpatialMappingManager.Instance.transform.childCount; i++)
+                    {
+                        SpatialMappingManager.Instance.transform.GetChild(i).gameObject.SetActive(true);
+                    }
+                    SpatialMappingManager.Instance.gameObject.GetComponent<SpatialMappingObserver>().TimeBetweenUpdates = 3.5f;
                 }
                 // If the user is not in placing mode, hide the spatial mapping mesh.
                 else
                 {
-                    //SpatialMappingManager.Instance.DrawVisualMeshes = false;
+                    //  SpatialMappingManager.Instance.DrawVisualMeshes = false;
 
                     // Add world anchor when object placement is done.
                     CreateAnchor();
+                    for (int i = 0; i < SpatialMappingManager.Instance.transform.childCount; i++)
+                    {
+                        SpatialMappingManager.Instance.transform.GetChild(i).gameObject.SetActive(false);
+                    }
+                    SpatialMappingManager.Instance.gameObject.GetComponent<SpatialMappingObserver>().TimeBetweenUpdates = 99999;
+
+                    effectPlayerManager.CreateSnowRock();
                 }
             }
             else
@@ -151,9 +167,9 @@ namespace HoloToolkit.Unity
 
         void Update()
         {
-                // If the user is in placing mode,
-                // update the placement to match the user's gaze.
-                if (placing)
+            // If the user is in placing mode,
+            // update the placement to match the user's gaze.
+            if (placing)
             {
                 // Do a raycast into the world that will only hit the Spatial Mapping mesh.
                 var headPosition = Camera.main.transform.position;

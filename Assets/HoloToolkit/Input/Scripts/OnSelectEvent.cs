@@ -10,7 +10,7 @@ public class OnSelectEvent : MonoBehaviour
         // dummy Start function so we can use this.enabled
     }
 
-    void OnSelect()
+    void OnSelectz()
     {
         if (this.enabled == false) return;
         if (Event != null)
